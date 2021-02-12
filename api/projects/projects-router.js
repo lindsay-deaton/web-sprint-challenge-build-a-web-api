@@ -8,17 +8,58 @@ const route = express.Router();
 // - [ ] Inside `api/projects/projects-router.js` build endpoints for performing CRUD operations on _projects_: GET, GETID, POST, PUT, DELETE
 
 
-route.get('/', async (__, res) => {
+route.get('/', async (__, res, next) => {
   try {
     const project = await Projects.get()
-    .then(projects => {
-    res.status(200).json(projects)
-  })
+    //the query was already ran
+      res.status(200).json(project)
+      console.log(project)
+  }
+  catch (error) {
+  next(error)
+  }
+})
+
+route.get("/:id", (req, res) => {
+  const idVar = req.params.id
+  Projects.get(idVar)
+    .then(project => {
+     res.status(200).json(project)   
+    })
     .catch(error => {
-      res.status(500).json({message: "Error retriving the projects requested."})
+      res.status(500).json({message: "Error, project not found."})
+    }) 
+})
+
+route.post("/", (req, res) => {
+  Projects.insert(req.body)
+    .then(resProjects => {
+    res.status(201).json(resProjects)
+    })
+    .catch(error => {
+    res.status(500).json({message: "Error adding the project."})
   })
 })
 
-// - [ ] Inside `api/projects/projects-router.js` add an endpoint for retrieving the list of actions for a project: GETprojectactions
+route.put("/:id", (req, res) => {
+  const idVar = req.params.id
+  const changes = req.body
+  Projects.update(idVar, changes)
+    .then(resProject => {
+    res.status(200).json(resProject)
+    })
+    .catch(error => {
+    res.status(500).json({message: "Error updating the projects"})
+  })
+})
 
+route.delete("/:id", (req, res) => {
+  Projects.remove(req.params.id)
+    .then(project => {
+      res.status(200).json( {message:`The project on ${req.params.id} has been removed`})
+    })
+    .catch(error => {
+      res.status(500).json({message: "Error deleting the project."})
+    })
+})
 module.exports = route;
