@@ -2,6 +2,7 @@
 const express = require("express");
 
 const Projects = require('./projects-model');
+const { validateProjectId } = require("../middleware/middleware.js")
 
 const route = express.Router();
 
@@ -20,7 +21,8 @@ route.get('/', async (__, res, next) => {
   }
 })
 
-route.get("/:id", (req, res) => {
+route.get("/:id", validateProjectId, (req, res) => {
+  console.log(req.params.id)
   const idVar = req.params.id
   Projects.get(idVar)
     .then(project => {
@@ -41,7 +43,7 @@ route.post("/", (req, res) => {
   })
 })
 
-route.put("/:id", (req, res) => {
+route.put("/:id", validateProjectId, (req, res) => {
   const idVar = req.params.id
   const changes = req.body
   Projects.update(idVar, changes)
@@ -53,7 +55,7 @@ route.put("/:id", (req, res) => {
   })
 })
 
-route.delete("/:id", (req, res) => {
+route.delete("/:id", validateProjectId, (req, res) => {
   Projects.remove(req.params.id)
     .then(project => {
       res.status(200).json( {message:`The project on ${req.params.id} has been removed`})
@@ -62,4 +64,5 @@ route.delete("/:id", (req, res) => {
       res.status(500).json({message: "Error deleting the project."})
     })
 })
+
 module.exports = route;
